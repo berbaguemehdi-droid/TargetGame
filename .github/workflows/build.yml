@@ -25,16 +25,16 @@ jobs:
           mkdir project
           unzip -q "$ZIP" -d project
 
-      - name: Find Gradle wrapper
-        run: |
-          GRADLEW=$(find project -name gradlew -type f | head -n 1)
-          chmod +x "$GRADLEW"
-          echo "GRADLEW=$GRADLEW" >> "$GITHUB_ENV"
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.7'
 
       - name: Build APK
         run: |
-          cd "$(dirname "$GRADLEW")"
-          ./gradlew assembleDebug
+          PROJECT=$(find project -name build.gradle -o -name build.gradle.kts | head -n 1)
+          cd "$(dirname "$PROJECT")"
+          gradle assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
