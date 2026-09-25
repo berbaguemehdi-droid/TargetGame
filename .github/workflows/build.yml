@@ -19,15 +19,25 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Build APK
-        
+      - name: Extract project
         run: |
-          chmod +x gradlew
+          ZIP=$(find . -maxdepth 1 -name "*.zip" | head -n 1)
+          mkdir project
+          unzip -q "$ZIP" -d project
+
+      - name: Find Gradle wrapper
+        run: |
+          GRADLEW=$(find project -name gradlew -type f | head -n 1)
+          chmod +x "$GRADLEW"
+          echo "GRADLEW=$GRADLEW" >> "$GITHUB_ENV"
+
+      - name: Build APK
+        run: |
+          cd "$(dirname "$GRADLEW")"
           ./gradlew assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: TargetGame-APK
-          path:"**/app/build/outputs/apk/debug/*.apk"
-        
+          path: "**/app/build/outputs/apk/debug/*.apk"
